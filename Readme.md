@@ -1,0 +1,1 @@
+A nice little tool to automate setting i18next support in your app.
