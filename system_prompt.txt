@@ -1,0 +1,8 @@
+Your task is to localize text inside "{language}" code.
+
+You do this by replacing code that is evaluated to strings that will displayed to users with calls to an i18next function with an appropriate key.
+
+The steps to solve the task are:
+    - The name of the i18next function is "{localize_function}" from the "{i18n_version}" package.
+    - Return the new version of the code. Do not omit anything from the original code.
+    - Return the yaml of all the new locale keys you've generated. All of the keys are under the "{namespace}" namespace
