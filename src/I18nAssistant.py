@@ -32,7 +32,7 @@ class I18nAssistant:
         return [localized_code, new_yaml_locale]
     
     def get_code(self, response):
-        regex = re.compile(f"(?<=```{self.language}\n).*(?=\n```\n\n)", flags=re.S|re.M)
+        regex = re.compile(f"(?<=^```{self.language}\n).*(?=\n```\n)", flags=re.S|re.M)
 
         return regex.search(response)[0]
 
