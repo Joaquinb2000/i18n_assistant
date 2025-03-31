@@ -12,7 +12,7 @@ load_dotenv()
 
 home = Path.home()
 
-llm = init_chat_model("gpt-4o-mini", model_provider="openai")
+llm = init_chat_model("gpt-4o-mini", model_provider="openai", temperature=0.5)
 I18nAssistant = I18nAssistant(llm, 'vue', '$t', 'vue')
 
 LOCALE_FILE_PATH = os.getenv('LOCALE_FILE_PATH')
@@ -26,7 +26,9 @@ def main(file_path):
             main(os.path.join(file_path, path))
     else:
         with open(relative_path) as file:
-            code, yaml = I18nAssistant.generate_localized_code(file, file.name)
+            file_name = os.path.basename(relative_path)
+            locale_namespace = file_name.split('.')[0]
+            code, yaml = I18nAssistant.generate_localized_code(file, locale_namespace)
 
         update_file_code(code, relative_path)
         update_locale_file(yaml, LOCALE_FILE_PATH)
@@ -37,7 +39,7 @@ if __name__ == '__main__':
         file_path = input("Input file path please: ")
 
         if BASE_TARGET_PATH:
-            file_path = "/".join([BASE_TARGET_PATH, file_path])
+            file_path = os.path.join(BASE_TARGET_PATH, file_path)
 
         main(file_path)
 
