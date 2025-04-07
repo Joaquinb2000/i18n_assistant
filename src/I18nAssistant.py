@@ -4,6 +4,8 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from src.prompts.context import SYSTEM_PROMPT
 
+from src.exceptions.ParsingError import ParsingError
+
 class I18nAssistant:
     def __init__(self, llm, language, i18n_function, i18n_package):
         self.llm = llm
@@ -32,11 +34,17 @@ class I18nAssistant:
         return [localized_code, new_yaml_locale]
     
     def get_code(self, response):
-        regex = re.compile(f"(?<=^```{self.language}\n).*(?=```\n)", flags=re.S|re.M)
+        try:
+            regex = re.compile(f"(?<=^```{self.language}\n).*(?=```\n)", flags=re.S|re.M)
 
-        return regex.search(response)[0]
+            return regex.search(response)[0]
+        except Exception:
+            raise ParsingError(f'Error parsing code from: {response}')
 
     def get_yaml(self, response):
-        regex = re.compile("(?<=```yaml\n).*(?=```$)", flags=re.S|re.M)
+        try:
+            regex = re.compile("(?<=```yaml\n).*(?=```$)", flags=re.S|re.M)
 
-        return regex.search(response)[0]
+            return regex.search(response)[0]
+        except Exception:
+            raise ParsingError(f'Error parsing yaml from {response}')

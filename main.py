@@ -17,22 +17,42 @@ I18nAssistant = I18nAssistant(llm, 'vue', '$t', 'vue')
 
 LOCALE_FILE_PATH = os.getenv('LOCALE_FILE_PATH')
 BASE_TARGET_PATH = os.getenv('BASE_TARGET_PATH')
+SKIP_PATHS = []
+invalid_paths = []
 
 def main(file_path):
     relative_path = os.path.join(home, file_path)
 
-    if(os.path.isdir(relative_path)):
-        for path in os.listdir(relative_path):
-            main(os.path.join(file_path, path))
-    else:
-        with open(relative_path) as file:
-            file_name = os.path.basename(relative_path)
-            locale_namespace = file_name.split('.')[0]
-            code, yaml = I18nAssistant.generate_localized_code(file, locale_namespace)
+    for skippable_path in SKIP_PATHS:
+        if skippable_path in relative_path: return
 
-        update_file_code(code, relative_path)
-        update_locale_file(yaml, LOCALE_FILE_PATH)
-        print(f"Sucessfully localized {file_path}!")
+    try:
+        if(os.path.isdir(relative_path)):
+            for path in os.listdir(relative_path):
+                main(os.path.join(file_path, path))
+        else:
+            print(f"Localizing {file_path}...")
+
+            with open(relative_path) as file:
+                file_name = os.path.basename(relative_path)
+                locale_namespace = file_name.split('.')[0]
+                code, yaml = I18nAssistant.generate_localized_code(file, locale_namespace)
+
+            update_file_code(code, relative_path)
+            update_locale_file(yaml, LOCALE_FILE_PATH)
+            print(f"Sucessfully localized {file_path}!")
+
+    except FileNotFoundError:
+        print(f"File path: '{relative_path}' doesn't exist")
+        invalid_paths.push(relative_path)
+
+    except Exception as e:
+        print(f"Error processing: '{relative_path}'.")
+        print(f"Error was: {str(e)}")
+
+        retry = input("Retry? (y/n): ")
+        if retry == 'y': 
+            main(relative_path)
     
 if __name__ == '__main__':
     while True:
@@ -42,5 +62,8 @@ if __name__ == '__main__':
             file_path = os.path.join(BASE_TARGET_PATH, file_path)
 
         main(file_path)
+
+        if len(invalid_paths) > 0:
+            print(f"Failed translating {"\n".join(invalid_paths)}")
 
         
